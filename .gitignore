@@ -1,162 +1,79 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+import tkinter as tk
+from tkinter import ttk, messagebox
+import csv
+from datetime import datetime
 
-# C extensions
-*.so
+# Khởi tạo cửa sổ
+root = tk.Tk()
+root.title("Thông tin nhân viên")
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+# Hàm lưu dữ liệu vào file CSV
+def save_to_csv():
+    data = [entry_id.get(), entry_name.get(), combo_unit.get(), entry_dob.get(),
+            entry_id_num.get(), entry_issue_date.get(), combo_gender.get()]
+    with open("employee_data.csv", "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(data)
+    messagebox.showinfo("Thông báo", "Dữ liệu đã được lưu thành công!")
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+# Hàm kiểm tra sinh nhật
+def show_today_birthdays():
+    today = datetime.now().strftime("%d/%m/%Y")
+    birthdays = []
+    try:
+        with open("employee_data.csv", "r", encoding="utf-8") as f:
+            reader = csv.reader(f)
+            for row in reader:
+                if row[3] == today:  # Cột ngày sinh (index 3)
+                    birthdays.append(row[1])  # Lấy tên nhân viên
+    except FileNotFoundError:
+        pass
+    messagebox.showinfo("Sinh nhật hôm nay", "\n".join(birthdays) if birthdays else "Không có nhân viên nào sinh nhật hôm nay.")
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+# Xuất danh sách nhân viên sắp xếp giảm dần theo tuổi
+def export_sorted_employees():
+    try:
+        with open("employee_data.csv", "r", encoding="utf-8") as f:
+            data = sorted(csv.reader(f), key=lambda x: datetime.strptime(x[3], "%d/%m/%Y"), reverse=True)
+        with open("sorted_employees.csv", "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerows(data)
+        messagebox.showinfo("Xuất file", "Danh sách đã được xuất ra file sorted_employees.csv.")
+    except FileNotFoundError:
+        messagebox.showerror("Lỗi", "Không tìm thấy dữ liệu để xuất.")
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
+# Giao diện nhập liệu
+tk.Label(root, text="Mã:").grid(row=0, column=0)
+entry_id = tk.Entry(root)
+entry_id.grid(row=0, column=1)
 
-# Translations
-*.mo
-*.pot
+tk.Label(root, text="Tên:").grid(row=1, column=0)
+entry_name = tk.Entry(root)
+entry_name.grid(row=1, column=1)
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+tk.Label(root, text="Đơn vị:").grid(row=2, column=0)
+combo_unit = ttk.Combobox(root, values=["Phân xưởng quê hàn", "Phòng kỹ thuật"])
+combo_unit.grid(row=2, column=1)
 
-# Flask stuff:
-instance/
-.webassets-cache
+tk.Label(root, text="Ngày sinh (DD/MM/YYYY):").grid(row=3, column=0)
+entry_dob = tk.Entry(root)
+entry_dob.grid(row=3, column=1)
 
-# Scrapy stuff:
-.scrapy
+tk.Label(root, text="Số CMND:").grid(row=4, column=0)
+entry_id_num = tk.Entry(root)
+entry_id_num.grid(row=4, column=1)
 
-# Sphinx documentation
-docs/_build/
+tk.Label(root, text="Ngày cấp:").grid(row=5, column=0)
+entry_issue_date = tk.Entry(root)
+entry_issue_date.grid(row=5, column=1)
 
-# PyBuilder
-.pybuilder/
-target/
+tk.Label(root, text="Giới tính:").grid(row=6, column=0)
+combo_gender = ttk.Combobox(root, values=["Nam", "Nữ"])
+combo_gender.grid(row=6, column=1)
 
-# Jupyter Notebook
-.ipynb_checkpoints
+# Các nút chức năng
+tk.Button(root, text="Lưu", command=save_to_csv).grid(row=7, column=0)
+tk.Button(root, text="Sinh nhật hôm nay", command=show_today_birthdays).grid(row=7, column=1)
+tk.Button(root, text="Xuất toàn bộ danh sách", command=export_sorted_employees).grid(row=8, column=0, columnspan=2)
 
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-#   For a library or package, you might want to ignore these files since the code is
-#   intended to run in multiple environments; otherwise, check them in:
-# .python-version
-
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
-
-# poetry
-#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
-#poetry.lock
-
-# pdm
-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
-#pdm.lock
-#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
-#   in version control.
-#   https://pdm.fming.dev/latest/usage/project/#working-with-version-control
-.pdm.toml
-.pdm-python
-.pdm-build/
-
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
-
-# PyCharm
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
+root.mainloop()
